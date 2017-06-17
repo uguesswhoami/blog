@@ -29,7 +29,7 @@
 
   
   
-  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+  <link href="/blog/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
 
 
 
@@ -63,9 +63,9 @@
 
 
 
-<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+<link href="/blog/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
 
-<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+<link href="/blog/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
   <meta name="keywords" content="Hexo, NexT" />
@@ -77,7 +77,7 @@
 
 
 
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+  <link rel="shortcut icon" type="image/x-icon" href="/blog/favicon.ico?v=5.0.1" />
 
 
 
@@ -87,17 +87,17 @@
 <meta name="description" content="&amp;#x5728;&amp;#x5B9E;&amp;#x9645;&amp;#x9879;&amp;#x76EE;&amp;#x4E2D;&amp;#x4F1A;&amp;#x5E94;&amp;#x7528;Guava Cache&amp;#x505A;&amp;#x672C;&amp;#x5730;&amp;#x7F13;&amp;#x5B58;&amp;#xFF0C;&amp;#x8FD9;&amp;#x91CC;&amp;#x7B80;&amp;#x5355;&amp;#x5206;&amp;#x6790;&amp;#x4E00;&amp;#x4E0B;Guav">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Guava cache 源码浅析">
-<meta property="og:url" content="/2016/03/01/Guava cache 源码浅析/index.html">
+<meta property="og:url" content="http://uguesswhoami.github.io/blog/2016/03/01/Guava cache 源码浅析/index.html">
 <meta property="og:site_name" content="xiaoke's blog">
 <meta property="og:description" content="&amp;#x5728;&amp;#x5B9E;&amp;#x9645;&amp;#x9879;&amp;#x76EE;&amp;#x4E2D;&amp;#x4F1A;&amp;#x5E94;&amp;#x7528;Guava Cache&amp;#x505A;&amp;#x672C;&amp;#x5730;&amp;#x7F13;&amp;#x5B58;&amp;#xFF0C;&amp;#x8FD9;&amp;#x91CC;&amp;#x7B80;&amp;#x5355;&amp;#x5206;&amp;#x6790;&amp;#x4E00;&amp;#x4E0B;Guav">
-<meta property="og:image" content="/01/Guava cache 源码浅析/uploads/files/1478862208747-guava数据结构-resized.png">
-<meta property="og:image" content="/01/Guava cache 源码浅析/uploads/files/1478862263500-缓存更新-resized.png">
-<meta property="og:image" content="/01/Guava cache 源码浅析/uploads/files/1478862280516-缓存操作2-resized.png">
+<meta property="og:image" content="http://uguesswhoami.github.io/blog/blog/blog/2016/03/01/Guava cache 源码浅析/uploads/files/1478862208747-guava数据结构-resized.png">
+<meta property="og:image" content="http://uguesswhoami.github.io/blog/blog/blog/2016/03/01/Guava cache 源码浅析/uploads/files/1478862263500-缓存更新-resized.png">
+<meta property="og:image" content="http://uguesswhoami.github.io/blog/blog/blog/2016/03/01/Guava cache 源码浅析/uploads/files/1478862280516-缓存操作2-resized.png">
 <meta property="og:updated_time" content="2017-03-03T02:43:51.100Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Guava cache 源码浅析">
 <meta name="twitter:description" content="&amp;#x5728;&amp;#x5B9E;&amp;#x9645;&amp;#x9879;&amp;#x76EE;&amp;#x4E2D;&amp;#x4F1A;&amp;#x5E94;&amp;#x7528;Guava Cache&amp;#x505A;&amp;#x672C;&amp;#x5730;&amp;#x7F13;&amp;#x5B58;&amp;#xFF0C;&amp;#x8FD9;&amp;#x91CC;&amp;#x7B80;&amp;#x5355;&amp;#x5206;&amp;#x6790;&amp;#x4E00;&amp;#x4E0B;Guav">
-<meta name="twitter:image" content="/01/Guava cache 源码浅析/uploads/files/1478862208747-guava数据结构-resized.png">
+<meta name="twitter:image" content="http://uguesswhoami.github.io/blog/blog/blog/2016/03/01/Guava cache 源码浅析/uploads/files/1478862208747-guava数据结构-resized.png">
 
 
 
@@ -144,7 +144,7 @@
   
 
   <div class="custom-logo-site-title">
-    <a href="/"  class="brand" rel="start">
+    <a href="/blog/"  class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
       <span class="site-title">xiaoke's blog</span>
       <span class="logo-line-after"><i></i></span>
@@ -169,7 +169,7 @@
       
         
         <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
+          <a href="/blog/" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
@@ -179,7 +179,7 @@
       
         
         <li class="menu-item menu-item-categories">
-          <a href="/categories" rel="section">
+          <a href="/blog/categories" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
             
@@ -189,7 +189,7 @@
       
         
         <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
+          <a href="/blog/about" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
             
@@ -199,7 +199,7 @@
       
         
         <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
+          <a href="/blog/archives" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
@@ -209,7 +209,7 @@
       
         
         <li class="menu-item menu-item-tags">
-          <a href="/tags" rel="section">
+          <a href="/blog/tags" rel="section">
             
               <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
             
@@ -281,7 +281,7 @@
               <span class="post-meta-item-text">分类于</span>
               
                 <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/Guava/" itemprop="url" rel="index">
+                  <a href="/blog/categories/Guava/" itemprop="url" rel="index">
                     <span itemprop="name">Guava</span>
                   </a>
                 </span>
@@ -297,7 +297,7 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/03/01/Guava cache 源码浅析/#comments" itemprop="discussionUrl">
+                <a href="/blog/2016/03/01/Guava cache 源码浅析/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/01/Guava cache 源码浅析/" itemprop="commentsCount"></span>
                 </a>
               </span>
@@ -335,7 +335,7 @@
 </ul>
 </blockquote>
 <h2 id="Guava-cache-&#x6570;&#x636E;&#x7ED3;&#x6784;"><a href="#Guava-cache-&#x6570;&#x636E;&#x7ED3;&#x6784;" class="headerlink" title="Guava cache &#x6570;&#x636E;&#x7ED3;&#x6784;"></a>Guava cache &#x6570;&#x636E;&#x7ED3;&#x6784;</h2><p>&#x5728;ConcurrentHashMap&#x51FA;&#x73B0;&#x4E4B;&#x524D;&#xFF0C;JDK&#x65E9;&#x671F;&#x7248;&#x672C;&#x4E2D;&#x5B9E;&#x73B0;&#x4E86;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;HashMap&#x2013;HashTable&#xFF0C;&#x4F46;&#x662F;HashTable&#x7684;&#x5B9E;&#x73B0;&#x65B9;&#x5F0F;&#x8F83;&#x91CD;&#xFF08;&#x9501;&#x4F4F;&#x6574;&#x4E2A;&#x8868;&#xFF09;&#x56E0;&#x6B64;&#x88AB;&#x6DD8;&#x6C70;&#xFF1B;&#x800C;ConcurrentHashMap&#x4F7F;&#x7528;&#x4E86;<code>&#x5206;&#x6BB5;&#x9501;</code>&#x6280;&#x672F;&#x5E76;&#x53D1;&#x6027;&#x80FD;&#x66F4;&#x597D;&#xFF0C;Guava cache&#x4E5F;&#x501F;&#x9274;&#x4E86;&#x8FD9;&#x79CD;&#x5E76;&#x53D1;&#x5904;&#x7406;&#x65B9;&#x5F0F;&#x3002;&#x5982;&#x56FE;&#x6240;&#x793A;&#x3002;</p>
-<p><img src="/01/Guava cache &#x6E90;&#x7801;&#x6D45;&#x6790;/uploads/files/1478862208747-guava&#x6570;&#x636E;&#x7ED3;&#x6784;-resized.png" alt="0_1478862208560_guava&#x6570;&#x636E;&#x7ED3;&#x6784;.png"> </p>
+<p><img src="/blog/blog/2016/03/01/Guava cache &#x6E90;&#x7801;&#x6D45;&#x6790;/uploads/files/1478862208747-guava&#x6570;&#x636E;&#x7ED3;&#x6784;-resized.png" alt="0_1478862208560_guava&#x6570;&#x636E;&#x7ED3;&#x6784;.png"> </p>
 <blockquote>
 <p>Guava cache&#x7531;segment&#x6570;&#x7EC4;&#x548C;Entry&#x94FE;&#x6570;&#x7EC4;&#x7EC4;&#x6210;&#xFF0C;cache&#x4E2D;Segments&#x5B9A;&#x4E49;&#x5982;&#x4E0B;&#xFF1A;</p>
 </blockquote>
@@ -375,7 +375,7 @@
 <p>&#x5B9A;&#x4E49;&#x4E3A;<code>volatile</code>&#x4E4B;&#x540E;&#xFF0C;&#x4FDD;&#x8BC1;&#x4E86;&#x5176;<code>&#x5185;&#x5B58;&#x53EF;&#x89C1;&#x6027;</code>&#xFF0C;&#x8FD9;&#x6837;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x65E0;&#x8BBA;&#x4F55;&#x65F6;&#x90FD;&#x80FD;&#x5F97;&#x5230;&#x6700;&#x65B0;&#x7684;&#x503C;&#xFF0C;&#x5728;&#x4FDD;&#x8BC1;&#x7EBF;&#x7A0B;&#x5B89;&#x5168;&#x7684;&#x524D;&#x63D0;&#x4E0B;&#x53C8;&#x6700;&#x5927;&#x9650;&#x5EA6;&#x7684;&#x63D0;&#x9AD8;&#x4E86;&#x5E76;&#x53D1;&#x6027;&#x80FD;&#x3002;</p>
 <h2 id="&#x52A8;&#x6001;&#x52A0;&#x8F7D;"><a href="#&#x52A8;&#x6001;&#x52A0;&#x8F7D;" class="headerlink" title="&#x52A8;&#x6001;&#x52A0;&#x8F7D;"></a>&#x52A8;&#x6001;&#x52A0;&#x8F7D;</h2><p>&#x52A8;&#x6001;&#x52A0;&#x8F7D;&#x884C;&#x4E3A;&#x53D1;&#x751F;&#x5728;&#x83B7;&#x53D6;&#x4E0D;&#x5230;&#x6570;&#x636E;&#x6216;&#x8005;&#x662F;&#x6570;&#x636E;&#x5DF2;&#x7ECF;&#x8FC7;&#x671F;&#x7684;&#x65F6;&#x95F4;&#x70B9;&#xFF0C;Guava&#x52A8;&#x6001;&#x52A0;&#x8F7D;&#x4F7F;&#x7528;&#x56DE;&#x8C03;&#x6A21;&#x5F0F;&#xFF0C;&#x7528;&#x6237;&#x81EA;&#x5B9A;&#x4E49;&#x52A0;&#x8F7D;&#x65B9;&#x5F0F;&#xFF0C;&#x7136;&#x540E;Guava cache&#x5728;&#x9700;&#x8981;&#x52A0;&#x8F7D;&#x65B0;&#x6570;&#x636E;&#x65F6;&#x4F1A;&#x56DE;&#x8C03;&#x7528;&#x6237;&#x7684;&#x81EA;&#x5B9A;&#x4E49;&#x52A0;&#x8F7D;&#x65B9;&#x5F0F;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">segmentFor(hash).get(key, hash, loader);</span><br></pre></td></tr></table></figure></p>
 <p><code>loader</code>&#x5373;&#x4E3A;&#x7528;&#x6237;&#x81EA;&#x5B9A;&#x4E49;&#x7684;&#x6570;&#x636E;&#x52A0;&#x8F7D;&#x65B9;&#x5F0F;&#xFF0C;&#x5F53;&#x67D0;&#x4E00;&#x7EBF;&#x7A0B;get&#x4E0D;&#x5230;&#x6570;&#x636E;&#x5E76;&#x4E14;<code>&#x6CA1;&#x6709;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x5728;get&#x6570;&#x636E;</code>&#x65F6;&#xFF0C;&#x4F1A;&#x53BB;&#x56DE;&#x8C03;&#x8BE5;&#x81EA;&#x5B9A;&#x4E49;&#x52A0;&#x8F7D;&#x65B9;&#x5F0F;&#x53BB;&#x52A0;&#x8F7D;&#x6570;&#x636E;&#x3002;</p>
-<p>&#x5728;&#x5E73;&#x5E38;&#x7684;&#x5F00;&#x53D1;&#x4E2D;&#x7528;&#x5230;&#x7F13;&#x5B58;&#x7684;&#x5730;&#x65B9;&#x4E00;&#x822C;&#x4F1A;&#x505A;&#x5982;&#x56FE;&#x64CD;&#x4F5C;&#xFF1A;<br><img src="/01/Guava cache &#x6E90;&#x7801;&#x6D45;&#x6790;/uploads/files/1478862263500-&#x7F13;&#x5B58;&#x66F4;&#x65B0;-resized.png" alt="0_1478862263360_&#x7F13;&#x5B58;&#x66F4;&#x65B0;.png"><br>&#x8FD9;&#x6837;&#x7684;&#x7F13;&#x5B58;&#x5904;&#x7406;&#x65B9;&#x5F0F;&#x5728;&#x9AD8;&#x5E76;&#x53D1;&#x573A;&#x666F;&#x5E76;&#x4E14;&#x7F13;&#x5B58;&#x8981;&#x91CD;&#x542F;&#x6216;&#x8005;&#x662F;&#x7F13;&#x5B58;&#x5931;&#x6548;&#x65F6;&#x4F1A;&#x6709;&#x5927;&#x91CF;&#x7EBF;&#x7A0B;&#x96C6;&#x4E2D;&#x8BBF;&#x95EE;DB&#xFF0C;&#x7ED9;DB&#x9020;&#x6210;&#x538B;&#x529B;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x7F13;&#x5B58;&#x96EA;&#x5D29;&#x3002;&#x5728;Guava cache&#x7684;&#x8D85;&#x65F6;&#x6A21;&#x5F0F;&#x4E0B;&#x91C7;&#x7528;&#x4E86;&#x4EE5;&#x4E0B;&#x65B9;&#x5F0F;&#xFF1A;<br><img src="/01/Guava cache &#x6E90;&#x7801;&#x6D45;&#x6790;/uploads/files/1478862280516-&#x7F13;&#x5B58;&#x64CD;&#x4F5C;2-resized.png" alt="0_1478862280360_&#x7F13;&#x5B58;&#x64CD;&#x4F5C;2.png"> </p>
+<p>&#x5728;&#x5E73;&#x5E38;&#x7684;&#x5F00;&#x53D1;&#x4E2D;&#x7528;&#x5230;&#x7F13;&#x5B58;&#x7684;&#x5730;&#x65B9;&#x4E00;&#x822C;&#x4F1A;&#x505A;&#x5982;&#x56FE;&#x64CD;&#x4F5C;&#xFF1A;<br><img src="/blog/blog/2016/03/01/Guava cache &#x6E90;&#x7801;&#x6D45;&#x6790;/uploads/files/1478862263500-&#x7F13;&#x5B58;&#x66F4;&#x65B0;-resized.png" alt="0_1478862263360_&#x7F13;&#x5B58;&#x66F4;&#x65B0;.png"><br>&#x8FD9;&#x6837;&#x7684;&#x7F13;&#x5B58;&#x5904;&#x7406;&#x65B9;&#x5F0F;&#x5728;&#x9AD8;&#x5E76;&#x53D1;&#x573A;&#x666F;&#x5E76;&#x4E14;&#x7F13;&#x5B58;&#x8981;&#x91CD;&#x542F;&#x6216;&#x8005;&#x662F;&#x7F13;&#x5B58;&#x5931;&#x6548;&#x65F6;&#x4F1A;&#x6709;&#x5927;&#x91CF;&#x7EBF;&#x7A0B;&#x96C6;&#x4E2D;&#x8BBF;&#x95EE;DB&#xFF0C;&#x7ED9;DB&#x9020;&#x6210;&#x538B;&#x529B;&#xFF0C;&#x4E5F;&#x5C31;&#x662F;&#x7F13;&#x5B58;&#x96EA;&#x5D29;&#x3002;&#x5728;Guava cache&#x7684;&#x8D85;&#x65F6;&#x6A21;&#x5F0F;&#x4E0B;&#x91C7;&#x7528;&#x4E86;&#x4EE5;&#x4E0B;&#x65B9;&#x5F0F;&#xFF1A;<br><img src="/blog/blog/2016/03/01/Guava cache &#x6E90;&#x7801;&#x6D45;&#x6790;/uploads/files/1478862280516-&#x7F13;&#x5B58;&#x64CD;&#x4F5C;2-resized.png" alt="0_1478862280360_&#x7F13;&#x5B58;&#x64CD;&#x4F5C;2.png"> </p>
 <p>&#x8FD9;&#x6837;&#x5728;&#x67D0;&#x4E00;&#x7EBF;&#x7A0B;get&#x4E0D;&#x5230;&#x6570;&#x636E;&#x65F6;&#x4F1A;&#x5148;&#x68C0;&#x67E5;&#x662F;&#x5426;&#x6709;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x5728;&#x8BD5;&#x56FE;get&#x6570;&#x636E;&#xFF0C;&#x5982;&#x679C;&#x6709;&#xFF0C;&#x5219;&#x963B;&#x585E;&#x7B49;&#x5F85;&#x5176;&#x4ED6;&#x7EBF;&#x7A0B;&#x7684;&#x7ED3;&#x679C;&#x6570;&#x636E;&#xFF0C;&#x82E5;&#x6CA1;&#x6709;&#xFF0C;&#x5219;&#x53BB;load&#x6570;&#x636E;&#xFF0C;&#x5176;&#x4ED6;get&#x7EBF;&#x7A0B;&#x4F1A;&#x963B;&#x585E;&#x7B49;&#x5F85;&#x3002;</p>
 <h3 id="&#x53C2;&#x8003;"><a href="#&#x53C2;&#x8003;" class="headerlink" title="&#x53C2;&#x8003;"></a>&#x53C2;&#x8003;</h3><p><a href="http://ifeve.com" target="_blank" rel="external">&#x5E76;&#x53D1;&#x7F16;&#x7A0B;&#x7F51;</a></p>
 <p><a href="http://ju.outofmemory.cn/entry/262684" target="_blank" rel="external">Guava LocalCache &#x7F13;&#x5B58;&#x4ECB;&#x7ECD;&#x53CA;&#x5B9E;&#x73B0;&#x6E90;&#x7801;&#x6DF1;&#x5165;&#x5256;&#x6790;</a></p>
@@ -406,16 +406,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/02/02/事件总线模式/" rel="next" title="事件总线模式">
-                <i class="fa fa-chevron-left"></i> 事件总线模式
+              <a href="/blog/2016/03/01/注解/" rel="next" title="注解">
+                <i class="fa fa-chevron-left"></i> 注解
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/03/01/注解/" rel="prev" title="注解">
-                注解 <i class="fa fa-chevron-right"></i>
+              <a href="/blog/2016/05/01/dubbo cache扩展实现/" rel="prev" title="dubbo cache 扩展">
+                dubbo cache 扩展 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -443,7 +443,7 @@
   <div class="comments" id="comments">
     
       <div class="ds-thread" data-thread-key="2016/03/01/Guava cache 源码浅析/"
-           data-title="Guava cache 源码浅析" data-url="/2016/03/01/Guava cache 源码浅析/">
+           data-title="Guava cache 源码浅析" data-url="http://uguesswhoami.github.io/blog/blog/2016/03/01/Guava cache 源码浅析/">
       </div>
     
   </div>
@@ -480,14 +480,14 @@
       <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
-               src="/images/avatar.png"
+               src="/blog/images/avatar.png"
                alt="xiaoke" />
           <p class="site-author-name" itemprop="name">xiaoke</p>
           <p class="site-description motion-element" itemprop="description">学习总结&生活感悟</p>
         </div>
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
-            <a href="/archives">
+            <a href="/blog/archives">
               <span class="site-state-item-count">16</span>
               <span class="site-state-item-name">日志</span>
             </a>
@@ -495,7 +495,7 @@
 
           
             <div class="site-state-item site-state-categories">
-              <a href="/categories">
+              <a href="/blog/categories">
                 <span class="site-state-item-count">10</span>
                 <span class="site-state-item-name">分类</span>
               </a>
@@ -504,7 +504,7 @@
 
           
             <div class="site-state-item site-state-tags">
-              <a href="/tags">
+              <a href="/blog/tags">
                 <span class="site-state-item-count">3</span>
                 <span class="site-state-item-name">标签</span>
               </a>
@@ -523,7 +523,7 @@
         
           <div class="cc-license motion-element" itemprop="license">
             <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
-              <img src="/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+              <img src="/blog/images/cc-by-nc-sa.svg" alt="Creative Commons" />
             </a>
           </div>
         
@@ -609,46 +609,46 @@
 
 
   
-  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+  <script type="text/javascript" src="/blog/vendors/jquery/index.js?v=2.1.3"></script>
 
   
-  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/blog/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
 
   
-  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  <script type="text/javascript" src="/blog/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
   
-  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+  <script type="text/javascript" src="/blog/vendors/velocity/velocity.min.js?v=1.2.1"></script>
 
   
-  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  <script type="text/javascript" src="/blog/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
 
   
-  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
-
-
-
-  
-  
-
-  
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
-
+  <script type="text/javascript" src="/blog/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 
   
 
 
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.0.1"></script>
 
 
 
