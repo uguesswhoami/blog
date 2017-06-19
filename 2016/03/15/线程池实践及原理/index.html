@@ -1,0 +1,688 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/blog/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/blog/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/blog/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/blog/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="&amp;#x7EBF;&amp;#x7A0B;&amp;#x6C60;&amp;#x5B9E;&amp;#x8DF5;&amp;#x53CA;&amp;#x539F;&amp;#x7406;&amp;#x5206;&amp;#x6790;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="线程池实践及原理">
+<meta property="og:url" content="http://uguesswhoami.github.io/blog/2016/03/15/线程池实践及原理/index.html">
+<meta property="og:site_name" content="xiaoke's blog">
+<meta property="og:description" content="&amp;#x7EBF;&amp;#x7A0B;&amp;#x6C60;&amp;#x5B9E;&amp;#x8DF5;&amp;#x53CA;&amp;#x539F;&amp;#x7406;&amp;#x5206;&amp;#x6790;">
+<meta property="og:updated_time" content="2017-06-19T10:50:12.023Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="线程池实践及原理">
+<meta name="twitter:description" content="&amp;#x7EBF;&amp;#x7A0B;&amp;#x6C60;&amp;#x5B9E;&amp;#x8DF5;&amp;#x53CA;&amp;#x539F;&amp;#x7406;&amp;#x5206;&amp;#x6790;">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Muse',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+  <title> 线程池实践及原理 | xiaoke's blog </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/blog/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">xiaoke's blog</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">hello</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/blog/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/blog/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/blog/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/blog/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/blog/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                线程池实践及原理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-15T00:00:00+08:00" content="2016-03-15">
+              2016-03-15
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/blog/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/blog/2016/03/15/线程池实践及原理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/15/线程池实践及原理/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>&#x7EBF;&#x7A0B;&#x6C60;&#x5B9E;&#x8DF5;&#x53CA;&#x539F;&#x7406;&#x5206;&#x6790;</p>
+</blockquote>
+<a id="more"></a>
+<h3 id="&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;"><a href="#&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;" class="headerlink" title="&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;"></a>&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;</h3><h4 id="&#x7EBF;&#x7A0B;&#x6C60;&#x53C2;&#x6570;"><a href="#&#x7EBF;&#x7A0B;&#x6C60;&#x53C2;&#x6570;" class="headerlink" title="&#x7EBF;&#x7A0B;&#x6C60;&#x53C2;&#x6570;"></a>&#x7EBF;&#x7A0B;&#x6C60;&#x53C2;&#x6570;</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">ThreadPoolExecutor</span><span class="params">(<span class="keyword">int</span> corePoolSize,</span><br><span class="line">                              <span class="keyword">int</span> maximumPoolSize,</span><br><span class="line">                              <span class="keyword">long</span> keepAliveTime,</span><br><span class="line">                              TimeUnit unit,</span><br><span class="line">                              BlockingQueue&lt;Runnable&gt; workQueue,</span><br><span class="line">                              RejectedExecutionHandler handler)</span></span></span><br></pre></td></tr></table></figure>
+<ul>
+<li>corePoolSize: &#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6570;&#xFF0C;&#x5F53;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x6570;&#x5C0F;&#x4E8E;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6570;&#x65F6;&#xFF0C;&#x4F1A;&#x521B;&#x5EFA;&#x65B0;&#x7684;&#x7EBF;&#x7A0B;&#x53BB;&#x6267;&#x884C;&#x4EFB;&#x52A1;&#xFF1B;&#x5F53;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x6570;&#x5927;&#x4E8E;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6570;&#x65F6;&#x4F1A;&#x5C06;&#x4EFB;&#x52A1;&#x653E;&#x5165;&#x961F;&#x5217;&#x4E2D;&#xFF1B;</li>
+<li>maximumPoolSize&#xFF1A;&#x6700;&#x5927;&#x7EBF;&#x7A0B;&#x6570;&#xFF0C;&#x5F53;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x6570;&#x5DF2;&#x7ECF;&#x5927;&#x4E8E;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6570;&#x4E14;&#x5C0F;&#x4E8E;&#x6700;&#x5927;&#x7EBF;&#x7A0B;&#x6570;&#x4E14;&#x5F53;&#x524D;&#x961F;&#x5217;&#x5DF2;&#x6EE1;&#x65F6;&#xFF0C;&#x5F53;&#x6709;&#x65B0;&#x4EFB;&#x52A1;&#x65F6;&#x4F1A;&#x521B;&#x5EFA;&#x65B0;&#x7684;&#x7EBF;&#x7A0B;&#xFF1B;</li>
+<li>keepAliveTime:&#x7EBF;&#x7A0B;&#x5B58;&#x6D3B;&#x65F6;&#x95F4; &#x9ED8;&#x8BA4;&#x6307;&#x9664;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x4E4B;&#x5916;&#x65B0;&#x521B;&#x5EFA;&#x7684;&#x7EBF;&#x7A0B;&#x7684;&#x5B58;&#x6D3B;&#x65F6;&#x95F4;&#xFF0C;&#x5982;&#x679C;&#x5728;&#x5B58;&#x6D3B;&#x65F6;&#x95F4;&#x540E;&#x6CA1;&#x6709;&#x65B0;&#x7684;&#x4EFB;&#x52A1;&#x5230;&#x6765;&#xFF0C;&#x5219;&#x9664;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x4E4B;&#x5916;&#x7684;&#x7EBF;&#x7A0B;&#x4F1A;&#x88AB;&#x9500;&#x6BC1;&#xFF1B;</li>
+<li>unit&#xFF1A;&#x7EBF;&#x7A0B;&#x5B58;&#x6D3B;&#x65F6;&#x95F4;&#x5355;&#x4F4D;</li>
+<li>workQueue&#xFF1A;&#x963B;&#x585E;&#x961F;&#x5217;&#xFF0C;&#x5F53;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x6570;&#x5927;&#x4E8E;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6570;&#x65F6;&#xFF0C;&#x4F1A;&#x4F18;&#x5148;&#x5C06;&#x65B0;&#x4EFB;&#x52A1;&#x653E;&#x5165;&#x963B;&#x585E;&#x961F;&#x5217;&#x4E2D;&#xFF1B;</li>
+<li>handler&#xFF1A;&#x62D2;&#x7EDD;&#x7B56;&#x7565;&#x6267;&#x884C;&#xFF0C;&#x5F53;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x6570;&#x5DF2;&#x5230;&#x6700;&#x5927;&#x7EBF;&#x7A0B;&#x6570;&#x4E14;&#x5F53;&#x524D;&#x961F;&#x5217;&#x5DF2;&#x6EE1;&#xFF0C;&#x5F53;&#x6709;&#x65B0;&#x4EFB;&#x52A1;&#x6765;&#x65F6;&#x4F1A;&#x6267;&#x884C;&#x62D2;&#x7EDD;&#x7B56;&#x7565;&#xFF0C;&#x9ED8;&#x8BA4;&#x4E3A;&#x76F4;&#x63A5;&#x629B;&#x51FA;&#x5F02;&#x5E38;&#xFF1B;</li>
+</ul>
+<h4 id="&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;-1"><a href="#&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;-1" class="headerlink" title="&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;"></a>&#x7EBF;&#x7A0B;&#x6C60;&#x4F7F;&#x7528;</h4><p>&#x573A;&#x666F;&#xFF1A;&#x4F7F;&#x7528;&#x591A;&#x7EBF;&#x7A0B;&#x5904;&#x7406;&#x4E00;&#x7EC4;&#x4EFB;&#x52A1;&#xFF0C;&#x4EFB;&#x52A1;&#x4E3A;&#x5BF9;&#x4EBA;&#x6570;&#x52A0;1</p>
+<ul>
+<li>task&#x4EE3;&#x7801;&#xFF1A;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">public class ThreadTask implements Runnable {</span><br><span class="line"></span><br><span class="line">    private static AtomicLong nums = new AtomicLong(0);</span><br><span class="line"></span><br><span class="line">    @Override</span><br><span class="line">    public void run() {</span><br><span class="line">       nums.incrementAndGet();</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public static AtomicLong getNums() {</span><br><span class="line">        return nums;</span><br><span class="line">    }</span><br><span class="line"></span><br><span class="line">    public static void setNums(AtomicLong nums) {</span><br><span class="line">        ThreadTask.nums = nums;</span><br><span class="line">    }</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+<ul>
+<li>&#x7EBF;&#x7A0B;&#x6C60;&#x521B;&#x5EFA;&#x4EE3;&#x7801;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">private static final Executor executor = </span><br><span class="line">        new ThreadPoolExecutor(5, 5, 0, TimeUnit.MILLISECONDS, new ArrayBlockingQueue&lt;Runnable&gt;(100), new ThreadPoolExecutor.CallerRunsPolicy());</span><br></pre></td></tr></table></figure>
+<p>&#x5176;&#x4E2D;&#x8BBE;&#x7F6E;<code>&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6570;</code>&#x4E3A;5&#xFF0C; <code>&#x6700;&#x5927;&#x7EBF;&#x7A0B;&#x6570;</code>&#x4E3A;5&#xFF0C; <code>&#x7EBF;&#x7A0B;&#x5B58;&#x6D3B;&#x65F6;&#x95F4;</code>&#x4E3A;0ms&#xFF0C;<code>&#x963B;&#x585E;&#x961F;&#x5217;</code>&#x4E3A;&#x5927;&#x5C0F;&#x4E3A;100&#x7684;ArrayBlockingQueue&#xFF0C;&#x5F53;&#x6240;&#x6709;&#x7EBF;&#x7A0B;&#x7EBF;&#x7A0B;&#x90FD;&#x5728;running&#x4E14;&#x961F;&#x5217;&#x6EE1;&#x65F6;&#x65B0;&#x4EFB;&#x52A1;&#x7684;<code>&#x62D2;&#x7EDD;&#x7B56;&#x7565;</code>&#x4E3A;&#x4F7F;&#x7528;&#x4E3B;&#x7EBF;&#x7A0B;&#x4EE3;&#x66FF;&#x591A;&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x65B0;&#x4EFB;&#x52A1;&#x3002;</p>
+<ul>
+<li>&#x4E3B;&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x4EE3;&#x7801;</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">public static void main(String[] args){</span><br><span class="line"></span><br><span class="line">        for (int i=0; i&lt;100; i++){</span><br><span class="line">            executor.execute(new ThreadTask());</span><br><span class="line">        }</span><br><span class="line">        try {</span><br><span class="line">            Thread.sleep(1000);</span><br><span class="line">        }catch (Exception e){</span><br><span class="line"></span><br><span class="line">        }</span><br><span class="line">        System.out.println(ThreadTask.getNums());</span><br><span class="line">}</span><br></pre></td></tr></table></figure>
+<h3 id="&#x7EBF;&#x7A0B;&#x6C60;&#x539F;&#x7406;"><a href="#&#x7EBF;&#x7A0B;&#x6C60;&#x539F;&#x7406;" class="headerlink" title="&#x7EBF;&#x7A0B;&#x6C60;&#x539F;&#x7406;"></a>&#x7EBF;&#x7A0B;&#x6C60;&#x539F;&#x7406;</h3><blockquote>
+<p>&#x7531;&#x591A;&#x7EBF;&#x7A0B;&#x4F7F;&#x7528;&#x5165;&#x53E3;&#x5206;&#x6790;&#x7EBF;&#x7A0B;&#x6C60;&#x539F;&#x7406;</p>
+</blockquote>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable command)</span> </span>{</span><br><span class="line">        <span class="keyword">if</span> (command == <span class="keyword">null</span>)</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException();</span><br><span class="line">        <span class="keyword">int</span> c = ctl.get();</span><br><span class="line">        <span class="keyword">if</span> (workerCountOf(c) &lt; corePoolSize) {</span><br><span class="line">            <span class="keyword">if</span> (addWorker(command, <span class="keyword">true</span>))</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            c = ctl.get();</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">if</span> (isRunning(c) &amp;&amp; workQueue.offer(command)) {</span><br><span class="line">            <span class="keyword">int</span> recheck = ctl.get();</span><br><span class="line">            <span class="keyword">if</span> (! isRunning(recheck) &amp;&amp; remove(command))</span><br><span class="line">                reject(command);</span><br><span class="line">            <span class="keyword">else</span> <span class="keyword">if</span> (workerCountOf(recheck) == <span class="number">0</span>)</span><br><span class="line">                addWorker(<span class="keyword">null</span>, <span class="keyword">false</span>);</span><br><span class="line">        }</span><br><span class="line">        <span class="keyword">else</span> <span class="keyword">if</span> (!addWorker(command, <span class="keyword">false</span>))</span><br><span class="line">            reject(command);</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+<p>&#x5165;&#x53E3;&#x4E3A;<code>execute</code>&#xFF0C;&#x8BE5;&#x65B9;&#x6CD5;&#x52FE;&#x52D2;&#x51FA;&#x4E86;&#x5F53;&#x65B0;&#x4EFB;&#x52A1;&#x5230;&#x6765;&#x65F6;&#x7EBF;&#x7A0B;&#x6C60;&#x7684;&#x6267;&#x884C;&#x6D41;&#x7A0B;&#xFF0C;&#x4E3B;&#x8981;&#x5206;&#x4E3A;&#x4EE5;&#x4E0B;&#x6B65;&#x9AA4;&#xFF1A;</p>
+<ul>
+<li>&#xFF08;1&#xFF09;&#x5224;&#x65AD;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x6570;&#x662F;&#x5426;&#x5927;&#x4E8E;corePoolSize&#xFF0C;&#x5982;&#x679C;&#x662F;&#xFF0C;&#x5219;&#x6267;&#x884C;&#x7B2C;&#xFF08;2&#xFF09;&#x6B65;&#xFF1B;&#x5982;&#x679C;&#x4E0D;&#x662F;&#xFF0C;&#x5219;&#x521B;&#x5EFA;&#x65B0;&#x7684;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#xFF0C;&#x6267;&#x884C;&#x8BE5;&#x4EFB;&#x52A1;&#xFF1B;</li>
+<li>&#xFF08;2&#xFF09;&#x5224;&#x65AD;&#x5F53;&#x524D;&#x963B;&#x585E;&#x961F;&#x5217;&#x662F;&#x5426;&#x5DF2;&#x6EE1;&#xFF0C;&#x5982;&#x679C;&#x5DF2;&#x7ECF;&#x6EE1;&#x4E86;&#xFF0C;&#x5219;&#x6267;&#x884C;&#x7B2C;&#xFF08;3&#xFF09;&#x6B65;&#xFF0C;&#x5982;&#x679C;&#x672A;&#x6EE1;&#xFF0C;&#x5219;&#x5C06;&#x65B0;&#x4EFB;&#x52A1;&#x653E;&#x5165;&#x5230;&#x961F;&#x5217;&#x4E2D;&#xFF0C;&#x5982;&#x679C;&#x653E;&#x5165;&#x961F;&#x5217;&#x5931;&#x8D25;&#xFF0C;&#x5219;&#x6267;&#x884C;&#x62D2;&#x7EDD;&#x7B56;&#x7565;&#xFF0C;&#x5373;&#x7B2C;&#xFF08;4&#xFF09;&#x6B65;&#xFF1B;</li>
+<li>&#xFF08;3&#xFF09;&#x5224;&#x65AD;&#x5F53;&#x524D;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x662F;&#x5426;&#x5927;&#x4E8E;&#x6700;&#x5927;maxPoolSize&#xFF0C;&#x5982;&#x679C;&#x662F;&#xFF0C;&#x5219;&#x6267;&#x884C;&#x62D2;&#x7EDD;&#x7B56;&#x7565;&#xFF0C;&#x5373;&#x7B2C;&#xFF08;4&#xFF09;&#x6B65;&#xFF1B;&#x5982;&#x679C;&#x5426;&#xFF0C;&#x5219;&#x521B;&#x5EFA;&#x65B0;&#x7684;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x65B0;&#x4EFB;&#x52A1;&#xFF1B;</li>
+<li>&#xFF08;4&#xFF09;&#x6267;&#x884C;&#x62D2;&#x7EDD;&#x7B56;&#x7565;</li>
+</ul>
+<blockquote>
+<p>&#x7531;&#x4EE5;&#x4E0A;&#x6B65;&#x9AA4;&#x53EF;&#x4EE5;&#x770B;&#x51FA;&#xFF0C;&#x65B0;&#x4EFB;&#x52A1;&#x5230;&#x6765;&#x65F6;&#x6709;&#x662F;&#x4E09;&#x4E2A;&#x8DEF;&#x7531;&#x5206;&#x522B;&#x662F;&#xFF1A;&#x521B;&#x5EFA;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x4EFB;&#x52A1;&#x3001;&#x5C06;&#x4EFB;&#x52A1;&#x52A0;&#x5165;&#x5230;&#x963B;&#x585E;&#x961F;&#x5217;&#x3001;&#x6839;&#x636E;&#x62D2;&#x7EDD;&#x7B56;&#x7565;&#x5904;&#x7406;&#x4EFB;&#x52A1;&#x3002;&#x4E0B;&#x9762;&#x5206;&#x522B;&#x6765;&#x770B;&#xFF1A;</p>
+<ul>
+<li>&#x521B;&#x5EFA;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x6267;&#x884C;&#x4EFB;&#x52A1;&#xFF0C;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line">private boolean addWorker(Runnable firstTask, boolean core) {</span><br><span class="line">       retry:</span><br><span class="line">       for (;;) {</span><br><span class="line">           int c = ctl.get();</span><br><span class="line">           int rs = runStateOf(c);</span><br><span class="line"></span><br><span class="line">           // Check if queue empty only if necessary.</span><br><span class="line">           if (rs &gt;= SHUTDOWN &amp;&amp;</span><br><span class="line">               ! (rs == SHUTDOWN &amp;&amp;</span><br><span class="line">                  firstTask == null &amp;&amp;</span><br><span class="line">                  ! workQueue.isEmpty()))</span><br><span class="line">               return false;</span><br><span class="line"></span><br><span class="line">           for (;;) {</span><br><span class="line">               int wc = workerCountOf(c);</span><br><span class="line">               if (wc &gt;= CAPACITY ||</span><br><span class="line">                   wc &gt;= (core ? corePoolSize : maximumPoolSize))</span><br><span class="line">                   return false;</span><br><span class="line">               if (compareAndIncrementWorkerCount(c))</span><br><span class="line">                   break retry;</span><br><span class="line">               c = ctl.get();  // Re-read ctl</span><br><span class="line">               if (runStateOf(c) != rs)</span><br><span class="line">                   continue retry;</span><br><span class="line">               // else CAS failed due to workerCount change; retry inner loop</span><br><span class="line">           }</span><br><span class="line">       }</span><br><span class="line"></span><br><span class="line">       boolean workerStarted = false;</span><br><span class="line">       boolean workerAdded = false;</span><br><span class="line">       Worker w = null;</span><br><span class="line">       try {</span><br><span class="line">           w = new Worker(firstTask);</span><br><span class="line">           final Thread t = w.thread;</span><br><span class="line">           if (t != null) {</span><br><span class="line">               final ReentrantLock mainLock = this.mainLock;</span><br><span class="line">               mainLock.lock();</span><br><span class="line">               try {</span><br><span class="line">                   // Recheck while holding lock.</span><br><span class="line">                   // Back out on ThreadFactory failure or if</span><br><span class="line">                   // shut down before lock acquired.</span><br><span class="line">                   int rs = runStateOf(ctl.get());</span><br><span class="line"></span><br><span class="line">                   if (rs &lt; SHUTDOWN ||</span><br><span class="line">                       (rs == SHUTDOWN &amp;&amp; firstTask == null)) {</span><br><span class="line">                       if (t.isAlive()) // precheck that t is startable</span><br><span class="line">                           throw new IllegalThreadStateException();</span><br><span class="line">                       workers.add(w);</span><br><span class="line">                       int s = workers.size();</span><br><span class="line">                       if (s &gt; largestPoolSize)</span><br><span class="line">                           largestPoolSize = s;</span><br><span class="line">                       workerAdded = true;</span><br><span class="line">                   }</span><br><span class="line">               } finally {</span><br><span class="line">                   mainLock.unlock();</span><br><span class="line">               }</span><br><span class="line">               if (workerAdded) {</span><br><span class="line">                   t.start();</span><br><span class="line">                   workerStarted = true;</span><br><span class="line">               }</span><br><span class="line">           }</span><br><span class="line">       } finally {</span><br><span class="line">           if (! workerStarted)</span><br><span class="line">               addWorkerFailed(w);</span><br><span class="line">       }</span><br><span class="line">       return workerStarted;</span><br><span class="line">   }</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</blockquote>
+<p>&#x521B;&#x5EFA;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x5206;&#x4E3A;&#x521B;&#x5EFA;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x548C;&#x521B;&#x5EFA;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x4EE5;&#x5916;&#x7684;&#x7EBF;&#x7A0B;&#xFF0C;&#x5177;&#x4F53;&#x521B;&#x5EFA;&#x4F55;&#x79CD;&#x7EBF;&#x7A0B;&#x524D;&#x9762;&#x5DF2;&#x7ECF;&#x8BF4;&#x660E;&#x3002;&#x5177;&#x4F53;&#x7684;&#x521B;&#x5EFA;&#x7EBF;&#x7A0B;&#x4EE3;&#x7801;&#x4E3A;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">w = new Worker(firstTask);</span><br><span class="line">final Thread t = w.thread;</span><br></pre></td></tr></table></figure></p>
+<p>&#x5F53;&#x521B;&#x5EFA;Worker&#x6210;&#x529F;&#xFF0C;&#x542F;&#x52A8;&#x7EBF;&#x7A0B;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if (workerAdded) {</span><br><span class="line">    t.start();</span><br><span class="line">    workerStarted = true;</span><br><span class="line">    }</span><br></pre></td></tr></table></figure></p>
+<p>&#x5F53;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x542F;&#x52A8;&#x540E;&#xFF0C;&#x4F1A;&#x6267;&#x884C;Worker&#x7C7B;&#x4E2D;&#x7684;run&#x65B9;&#x6CD5;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">public void run() {</span><br><span class="line">    runWorker(this);</span><br><span class="line">}</span><br></pre></td></tr></table></figure></p>
+<p>&#x5176;&#x4E2D;&#x5DE5;&#x4F5C;&#x7EBF;&#x7A0B;&#x5177;&#x4F53;&#x5904;&#x7406;&#x4EFB;&#x52A1;&#x7684;&#x903B;&#x8F91;&#x5C31;&#x5728;<code>runWorker</code>&#x65B9;&#x6CD5;&#x4E2D;&#xFF0C;&#x5982;&#x4E0B;&#xFF1A;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">final void runWorker(Worker w) {</span><br><span class="line">        Thread wt = Thread.currentThread();</span><br><span class="line">        Runnable task = w.firstTask;</span><br><span class="line">        w.firstTask = null;</span><br><span class="line">        w.unlock(); // allow interrupts</span><br><span class="line">        boolean completedAbruptly = true;</span><br><span class="line">        try {</span><br><span class="line">            while (task != null || (task = getTask()) != null) {</span><br><span class="line">                w.lock();</span><br><span class="line">                // If pool is stopping, ensure thread is interrupted;</span><br><span class="line">                // if not, ensure thread is not interrupted.  This</span><br><span class="line">                // requires a recheck in second case to deal with</span><br><span class="line">                // shutdownNow race while clearing interrupt</span><br><span class="line">                if ((runStateAtLeast(ctl.get(), STOP) ||</span><br><span class="line">                     (Thread.interrupted() &amp;&amp;</span><br><span class="line">                      runStateAtLeast(ctl.get(), STOP))) &amp;&amp;</span><br><span class="line">                    !wt.isInterrupted())</span><br><span class="line">                    wt.interrupt();</span><br><span class="line">                try {</span><br><span class="line">                    beforeExecute(wt, task);</span><br><span class="line">                    Throwable thrown = null;</span><br><span class="line">                    try {</span><br><span class="line">                        task.run();</span><br><span class="line">                    } catch (RuntimeException x) {</span><br><span class="line">                        thrown = x; throw x;</span><br><span class="line">                    } catch (Error x) {</span><br><span class="line">                        thrown = x; throw x;</span><br><span class="line">                    } catch (Throwable x) {</span><br><span class="line">                        thrown = x; throw new Error(x);</span><br><span class="line">                    } finally {</span><br><span class="line">                        afterExecute(task, thrown);</span><br><span class="line">                    }</span><br><span class="line">                } finally {</span><br><span class="line">                    task = null;</span><br><span class="line">                    w.completedTasks++;</span><br><span class="line">                    w.unlock();</span><br><span class="line">                }</span><br><span class="line">            }</span><br><span class="line">            completedAbruptly = false;</span><br><span class="line">        } finally {</span><br><span class="line">            processWorkerExit(w, completedAbruptly);</span><br><span class="line">        }</span><br><span class="line">    }</span><br></pre></td></tr></table></figure></p>
+<p>&#x5177;&#x4F53;&#x5904;&#x7406;&#x903B;&#x8F91;&#x5982;&#x4E0B;&#xFF1A;</p>
+<p><em>&#xFF08;1&#xFF09;&#x5148;&#x5904;&#x7406;<code>firstTask</code>&#xFF0C;&#x6267;&#x884C;task&#x4E2D;&#x7684;<code>run</code>&#x65B9;&#x6CD5;&#xFF1B;
+</em>&#xFF08;2&#xFF09;&#x5982;&#x679C;<code>firstTask</code>&#x5904;&#x7406;&#x5B8C;&#x6210;&#xFF0C;&#x5219;&#x4ECE;&#x961F;&#x5217;&#x4E2D;&#x53D6;&#x4EFB;&#x52A1;&#xFF08;<code>getTask</code>&#xFF09;&#xFF0C;&#x6267;&#x884C;&#x4EFB;&#x52A1;&#x7684;<code>run</code>&#x65B9;&#x6CD5;&#xFF1B;</p>
+<p>&#x5176;&#x4E2D;<code>getTask</code>&#x65B9;&#x6CD5;&#x4E3A;&#x4ECE;&#x961F;&#x5217;&#x4E2D;&#x53D6;&#x4EFB;&#x52A1;&#xFF0C;&#x4EE3;&#x7801;&#x5982;&#x4E0B;&#xFF1A;</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">private Runnable getTask() {</span><br><span class="line">        boolean timedOut = false; // Did the last poll() time out?</span><br><span class="line"></span><br><span class="line">        for (;;) {</span><br><span class="line">            int c = ctl.get();</span><br><span class="line">            int rs = runStateOf(c);</span><br><span class="line"></span><br><span class="line">            // Check if queue empty only if necessary.</span><br><span class="line">            if (rs &gt;= SHUTDOWN &amp;&amp; (rs &gt;= STOP || workQueue.isEmpty())) {</span><br><span class="line">                decrementWorkerCount();</span><br><span class="line">                return null;</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            int wc = workerCountOf(c);</span><br><span class="line"></span><br><span class="line">            // Are workers subject to culling?</span><br><span class="line">            boolean timed = allowCoreThreadTimeOut || wc &gt; corePoolSize;</span><br><span class="line"></span><br><span class="line">            if ((wc &gt; maximumPoolSize || (timed &amp;&amp; timedOut))</span><br><span class="line">                &amp;&amp; (wc &gt; 1 || workQueue.isEmpty())) {</span><br><span class="line">                if (compareAndDecrementWorkerCount(c))</span><br><span class="line">                    return null;</span><br><span class="line">                continue;</span><br><span class="line">            }</span><br><span class="line"></span><br><span class="line">            try {</span><br><span class="line">                Runnable r = timed ?</span><br><span class="line">                    workQueue.poll(keepAliveTime, TimeUnit.NANOSECONDS) :</span><br><span class="line">                    workQueue.take();</span><br><span class="line">                if (r != null)</span><br><span class="line">                    return r;</span><br><span class="line">                timedOut = true;</span><br><span class="line">            } catch (InterruptedException retry) {</span><br><span class="line">                timedOut = false;</span><br><span class="line">            }</span><br><span class="line">        }</span><br><span class="line">    }</span><br></pre></td></tr></table></figure>
+<p>&#x4E3B;&#x8981;&#x7684;&#x903B;&#x8F91;&#x4E3A;&#xFF1A;</p>
+<ul>
+<li>&#xFF08;1&#xFF09;&#x5224;&#x65AD;&#x5F53;&#x524D;&#x7EBF;&#x7A0B;&#x662F;&#x5426;&#x4E3A;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#xFF0C;&#x5E76;&#x4E14;&#x5224;&#x65AD;&#x662F;&#x5426;&#x8BBE;&#x7F6E;&#x4E86;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x4E5F;&#x4F1A;&#x9500;&#x6BC1;&#xFF0C;&#x5982;&#x679C;&#x662F;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x4E14;&#x672A;&#x8BBE;&#x7F6E;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6D88;&#x4EA1;&#xFF0C;&#x5219;&#x4ECE;&#x961F;&#x5217;&#x4E2D;&#x53D6;&#x4EFB;&#x52A1;&#xFF0C;&#x5982;&#x679C;&#x53D6;&#x4E0D;&#x5230;&#xFF0C;&#x5219;&#x4E00;&#x76F4;&#x963B;&#x585E;&#xFF1B;</li>
+<li>&#xFF08;2&#xFF09;&#x5982;&#x679C;&#x975E;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#xFF0C;&#x6216;&#x8005;&#x662F;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x4F46;&#x662F;&#x8BBE;&#x7F6E;&#x4E86;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6D88;&#x4EA1;&#xFF0C;&#x5219;&#x5F53;&#x53D6;&#x4E0D;&#x5230;&#x4EFB;&#x52A1;&#x65F6;&#x5E76;&#x4E14;&#x8D85;&#x65F6;&#x65F6;&#xFF0C;&#x7EBF;&#x7A0B;&#x4F1A;&#x7EE7;&#x7EED;&#x6267;&#x884C;&#x8FDB;&#x800C;&#x6D88;&#x4EA1;&#xFF1B;<blockquote>
+<p>&#x7EFC;&#x4E0A;&#xFF0C;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x6570;&#x5982;&#x679C;&#x672A;&#x8BBE;&#x7F6E;&#x6D88;&#x4EA1;&#x5C5E;&#x6027;<code>allowCoreThreadTimeOut</code>&#xFF0C;&#x5219;&#x4F1A;&#x4E00;&#x76F4;&#x963B;&#x585E;&#x7B49;&#x5F85;&#x65B0;&#x4EFB;&#x52A1;&#x7684;&#x5230;&#x6765;&#xFF0C;&#x8FDB;&#x800C;&#x4E0D;&#x7528;&#x91CD;&#x65B0;&#x521B;&#x5EFA;&#x7EBF;&#x7A0B;&#xFF0C;&#x4F46;&#x662F;&#x6838;&#x5FC3;&#x7EBF;&#x7A0B;&#x4E4B;&#x5916;&#x7684;&#x5C31;&#x4F1A;&#x5728;&#x963B;&#x585E;&#x8D85;&#x65F6;&#x65F6;&#x95F4;&#x540E;&#x6D88;&#x4EA1;&#xFF0C;&#x6240;&#x4EE5;&#x9700;&#x8981;&#x91CD;&#x65B0;&#x521B;&#x5EFA;&#x3002;</p>
+</blockquote>
+</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/blog/2016/03/01/Guava cache 源码浅析/" rel="next" title="Guava cache 源码浅析">
+                <i class="fa fa-chevron-left"></i> Guava cache 源码浅析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/blog/2016/03/15/回调模式/" rel="prev" title="回调模式">
+                回调模式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/15/线程池实践及原理/"
+           data-title="线程池实践及原理" data-url="http://uguesswhoami.github.io/blog/blog/2016/03/15/线程池实践及原理/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/blog/images/avatar.png"
+               alt="xiaoke" />
+          <p class="site-author-name" itemprop="name">xiaoke</p>
+          <p class="site-description motion-element" itemprop="description">学习总结&生活感悟</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/blog/archives">
+              <span class="site-state-item-count">18</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/blog/categories">
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/blog/tags">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+          <div class="cc-license motion-element" itemprop="license">
+            <a href="http://creativecommons.org/licenses/by-nc-sa/4.0" class="cc-opacity" target="_blank">
+              <img src="/blog/images/cc-by-nc-sa.svg" alt="Creative Commons" />
+            </a>
+          </div>
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#线程池使用"><span class="nav-number">1.</span> <span class="nav-text">线程池使用</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#线程池参数"><span class="nav-number">1.1.</span> <span class="nav-text">线程池参数</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程池使用-1"><span class="nav-number">1.2.</span> <span class="nav-text">线程池使用</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#线程池原理"><span class="nav-number">2.</span> <span class="nav-text">线程池原理</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaoke</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Muse
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/blog/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/blog/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/blog/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/blog/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/blog/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/blog/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/blog/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/blog/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/blog/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"xiaoketech"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+  
+
+
+
+
+
+  
+  
+  
+
+  
+
+  
+
+</body>
+</html>
